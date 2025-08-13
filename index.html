@@ -59,7 +59,76 @@
             margin-bottom: 30px;
         }
 
-        input[type="text"], input[type="number"] {
+        /* 새로운 입력 컨트롤 레이아웃 */
+        .input-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-controls input[type="text"] {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-controls input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .add-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .add-btn:hover:not(:disabled) {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .add-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .complete-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .complete-btn:hover:not(:disabled) {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .complete-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        input[type="number"] {
             width: 100%;
             padding: 15px;
             border: 2px solid #e0e0e0;
@@ -69,7 +138,7 @@
             margin-bottom: 20px;
         }
 
-        input[type="text"]:focus, input[type="number"]:focus {
+        input[type="number"]:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -257,33 +326,18 @@
             .countdown {
                 font-size: 3em;
             }
+
+            .input-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .add-btn {
+                padding: 15px;
+            }
         }
 
-        /* 🆕 방문자 카운터 스타일 추가 */
-        .visitor-counter {
-            margin-top: 30px;
-            padding: 15px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
 
-        .visitor-info {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .visitor-info span {
-            color: #666;
-            font-size: 14px;
-            font-weight: 500;
-            padding: 8px 12px;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 20px;
-            border: 1px solid rgba(102, 126, 234, 0.2);
-        }
     </style>
 </head>
 <body>
@@ -293,9 +347,13 @@
         <!-- 1단계: 항목 입력 -->
         <div id="step1" class="step active">
             <div class="input-section">
-                <input type="text" id="itemInput" placeholder="항목 입력 후 엔터 | 빈 상태에서 엔터 = 입력 완료" maxlength="50">
+                <div class="input-controls">
+                    <input type="text" id="itemInput" placeholder="항목을 입력해주세요" maxlength="50">
+                    <button class="add-btn" id="addBtn" onclick="addItem()">추가</button>
+                </div>
+                <button class="complete-btn" id="completeBtn" onclick="completeInput()" disabled>입력 완료</button>
             </div>
-            <div class="info-text">항목을 하나씩 입력하고 엔터를 눌러주세요.<br>입력이 끝나면 빈 상태에서 엔터를 눌러주세요.</div>
+            <div class="info-text">항목을 입력하고 '추가' 버튼을 눌러주세요.<br>모든 항목을 입력한 후 '입력 완료'를 눌러주세요.</div>
             <div class="items-list">
                 <div id="currentItems">입력된 항목이 여기에 표시됩니다.</div>
             </div>
@@ -325,14 +383,7 @@
             <div id="results"></div>
             <button class="main-btn" onclick="restart()" style="margin-top: 20px;">🔄 처음부터 다시</button>
         </div>
-        
-        <!-- 🆕 방문자 카운터 추가 -->
-        <div class="visitor-counter">
-            <div class="visitor-info">
-                <span id="todayVisitors">📅 오늘: -</span>
-                <span id="totalVisitors">📊 누적: -</span>
-            </div>
-        </div>
+
     </div>
 
     <script>
@@ -340,20 +391,21 @@
         let drawCount = 0;
         let currentStep = 1;
 
-        // 엔터키 이벤트
+        // 엔터키 이벤트 (항목 추가만)
         document.getElementById('itemInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 const input = document.getElementById('itemInput');
-                if (input.value.trim() === '') {
-                    // 빈 상태에서 엔터 -> 입력 완료
-                    if (items.length > 0) {
-                        showConfirmStep();
-                    }
-                } else {
-                    // 항목 추가
+                if (input.value.trim() !== '') {
+                    // 내용이 있을 때만 항목 추가
                     addItem();
                 }
+                // 빈 상태에서 엔터는 무시
             }
+        });
+
+        // 입력 필드 변화 감지 (버튼 상태 업데이트)
+        document.getElementById('itemInput').addEventListener('input', function() {
+            updateButtonStates();
         });
 
         document.getElementById('drawCountInput').addEventListener('keypress', function(e) {
@@ -361,6 +413,18 @@
                 startCountdown();
             }
         });
+
+        function updateButtonStates() {
+            const input = document.getElementById('itemInput');
+            const addBtn = document.getElementById('addBtn');
+            const completeBtn = document.getElementById('completeBtn');
+            
+            // 추가 버튼: 입력 내용이 있을 때만 활성화
+            addBtn.disabled = input.value.trim() === '';
+            
+            // 완료 버튼: 항목이 하나 이상 있을 때만 활성화
+            completeBtn.disabled = items.length === 0;
+        }
 
         function addItem() {
             const input = document.getElementById('itemInput');
@@ -371,12 +435,23 @@
             if (items.includes(item)) {
                 alert('이미 추가된 항목입니다!');
                 input.value = '';
+                updateButtonStates();
                 return;
             }
             
             items.push(item);
             input.value = '';
             updateCurrentItems();
+            updateButtonStates();
+            
+            // 포커스를 다시 입력 필드로
+            input.focus();
+        }
+
+        function completeInput() {
+            if (items.length > 0) {
+                showConfirmStep();
+            }
         }
 
         function updateCurrentItems() {
@@ -403,6 +478,7 @@
         function removeItem(index) {
             items.splice(index, 1);
             updateCurrentItems();
+            updateButtonStates();
         }
 
         function showConfirmStep() {
@@ -437,6 +513,7 @@
             currentStep = 1;
             showStep(1);
             updateCurrentItems();
+            updateButtonStates();
             document.getElementById('itemInput').focus();
         }
 
@@ -526,42 +603,14 @@
             
             showStep(1);
             updateCurrentItems();
+            updateButtonStates();
             document.getElementById('itemInput').focus();
         }
 
         // 초기화
         updateCurrentItems();
+        updateButtonStates();
         document.getElementById('itemInput').focus();
-        
-        // 🆕 방문자 카운터 로드
-        loadVisitorCount();
-
-        // 🆕 방문자 카운터 함수들
-        async function loadVisitorCount() {
-            try {
-                // 오늘 날짜 키 생성 (YYYY-MM-DD 형식)
-                const today = new Date().toISOString().split('T')[0];
-                const todayKey = `random-picker-today-${today}`;
-                const totalKey = 'random-picker-total';
-                
-                // 오늘 방문자 수 증가
-                const todayResponse = await fetch(`https://api.countapi.xyz/hit/${todayKey}`);
-                const todayData = await todayResponse.json();
-                
-                // 누적 방문자 수 증가
-                const totalResponse = await fetch(`https://api.countapi.xyz/hit/${totalKey}`);
-                const totalData = await totalResponse.json();
-                
-                // 화면에 표시
-                document.getElementById('todayVisitors').textContent = `📅 오늘: ${todayData.value || 0}`;
-                document.getElementById('totalVisitors').textContent = `📊 누적: ${totalData.value || 0}`;
-                
-            } catch (error) {
-                console.log('방문자 카운터 로딩 실패:', error);
-                document.getElementById('todayVisitors').textContent = '📅 오늘: -';
-                document.getElementById('totalVisitors').textContent = '📊 누적: -';
-            }
-        }
     </script>
 </body>
 </html>
