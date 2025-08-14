@@ -561,7 +561,7 @@
         }
 
         function showResults() {
-            // 중복 없는 랜덤 추출 (기존 순서 유지)
+            // 중복 없는 랜덤 추출
             const shuffledItems = [...items];
             const selectedItems = [];
             
@@ -570,15 +570,12 @@
                 selectedItems.push(shuffledItems.splice(randomIndex, 1)[0]);
             }
             
-            // 원래 입력 순서대로 정렬
-            selectedItems.sort((a, b) => items.indexOf(a) - items.indexOf(b));
-            
             const resultsElement = document.getElementById('results');
             resultsElement.innerHTML = `
                 <div class="results">
                     <h3>🎯 뽑기 결과</h3>
-                    ${selectedItems.map((item, index) => 
-                        `<div class="result-item">${index + 1}. ${item}</div>`
+                    ${selectedItems.map(item => 
+                        `<div class="result-item">${items.indexOf(item) + 1}. ${item}</div>`
                     ).join('')}
                 </div>
             `;
