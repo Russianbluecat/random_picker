@@ -4,67 +4,613 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎯 랜덤 뽑기</title>
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-H7RL9672WH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-H7RL9672WH');
+    </script>
+    
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 500px;
-            margin: auto;
-            padding: 20px;
-            background-color: #f5f5f5;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        h1 {
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
             text-align: center;
         }
-        input, button {
-            padding: 10px;
-            margin: 5px 0;
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        /* 새로운 입력 컨트롤 레이아웃 */
+        .input-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-controls input[type="text"] {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-controls input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .add-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .add-btn:hover:not(:disabled) {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .add-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .complete-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .complete-btn:hover:not(:disabled) {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .complete-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        input[type="number"] {
             width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            margin-bottom: 20px;
         }
-        #items-list {
-            margin: 10px 0;
-            background: #fff;
-            padding: 10px;
-            border-radius: 5px;
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
         }
-        .item {
-            padding: 5px;
-            border-bottom: 1px solid #eee;
+
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
         }
+
+        .main-btn {
+            background: #667eea;
+            color: white;
+            padding: 18px 40px;
+            font-size: 18px;
+        }
+
+        .main-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .confirm-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+        }
+
+        .confirm-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .cancel-btn {
+            background: #f44336;
+            color: white;
+            padding: 15px 30px;
+        }
+
+        .cancel-btn:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+
+        .items-list {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 60px;
+        }
+
+        .item-display {
+            color: #333;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .item-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .item-tag {
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+            animation: fadeIn 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .remove-item {
+            background: rgba(255,255,255,0.3);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .remove-item:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .countdown {
+            font-size: 4em;
+            color: #667eea;
+            font-weight: bold;
+            margin: 30px 0;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .results {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            box-shadow: 0 10px 20px rgba(255,215,0,0.3);
+            animation: resultPop 0.5s ease-out;
+        }
+
+        .results h3 {
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
         .result-item {
-            background: #d1f7d6;
-            padding: 5px;
-            margin: 5px 0;
-            border-radius: 5px;
+            background: rgba(255,255,255,0.2);
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.3em;
+            font-weight: bold;
         }
+
+        @keyframes resultPop {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .info-text {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .error-text {
+            color: #f44336;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .countdown {
+                font-size: 3em;
+            }
+
+            .input-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .add-btn {
+                padding: 15px;
+            }
+        }
+
+
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>🎯 랜덤 뽑기</h1>
+        
+        <!-- 1단계: 항목 입력 -->
+        <div id="step1" class="step active">
+            <div class="input-section">
+                <div class="input-controls">
+                    <input type="text" id="itemInput" placeholder="항목을 입력해주세요" maxlength="50">
+                    <button class="add-btn" id="addBtn" onclick="addItem()">추가</button>
+                </div>
+                <button class="complete-btn" id="completeBtn" onclick="completeInput()" disabled>입력 완료</button>
+            </div>
+            <div class="info-text">항목을 입력하고 '추가' 버튼을 눌러주세요.<br>모든 항목을 입력한 후 '입력 완료'를 눌러주세요.</div>
+            <div class="items-list">
+                <div id="currentItems">입력된 항목이 여기에 표시됩니다.</div>
+            </div>
+        </div>
 
-<h1>🎯 랜덤 뽑기</h1>
-<input type="text" id="item-input" placeholder="아이템 입력">
-<button onclick="addItem()">➕ 추가</button>
-<div id="items-list"></div>
+        <!-- 2단계: 확인 -->
+        <div id="step2" class="step">
+            <div class="items-list">
+                <div id="confirmItems"></div>
+            </div>
+            <div class="info-text" id="confirmText"></div>
+            <button class="confirm-btn" onclick="proceedToDraw()">Y - 진행</button>
+            <button class="cancel-btn" onclick="startOver()">N - 다시 시작</button>
+        </div>
 
-<input type="number" id="draw-count" placeholder="몇 개 뽑을까요?" min="1">
-<button onclick="drawItems()">🎲 뽑기</button>
-<button onclick="resetList()">♻️ 리셋</button>
+        <!-- 3단계: 뽑을 개수 입력 -->
+        <div id="step3" class="step">
+            <div class="info-text" id="drawCountInfo"></div>
+            <input type="number" id="drawCountInput" placeholder="뽑을 개수를 입력해주세요" min="1">
+            <div id="errorMessage" class="error-text"></div>
+            <button class="main-btn" onclick="startCountdown()">뽑기 시작!</button>
+        </div>
 
-<div id="results"></div>
+        <!-- 4단계: 카운트다운 및 결과 -->
+        <div id="step4" class="step">
+            <div class="countdown" id="countdown"></div>
+            <div id="results"></div>
+            <button class="main-btn" onclick="restart()" style="margin-top: 20px;">🔄 처음부터 다시</button>
+        </div>
 
-<script>
-let items = [];
+    </div>
 
-function addItem() {
-    const input = document.getElementById('item-input');
-    const value = input.value.trim();
-    if (value) {
-        items.push(value);
-        input.value = '';
-        renderItems();
-    }
-}
+    <script>
+        let items = [];
+        let drawCount = 0;
+        let currentStep = 1;
 
-function renderItems() {
-    const listElement = document.getElementById('items-list');
-    listElement.innerHTML = items.map((item, index) => `<div class="item">${index + 1}. ${item}</div>`).j
+        // 엔터키 이벤트 (항목 추가만)
+        document.getElementById('itemInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const input = document.getElementById('itemInput');
+                if (input.value.trim() !== '') {
+                    // 내용이 있을 때만 항목 추가
+                    addItem();
+                }
+                // 빈 상태에서 엔터는 무시
+            }
+        });
 
+        // 입력 필드 변화 감지 (버튼 상태 업데이트)
+        document.getElementById('itemInput').addEventListener('input', function() {
+            updateButtonStates();
+        });
+
+        document.getElementById('drawCountInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                startCountdown();
+            }
+        });
+
+        function updateButtonStates() {
+            const input = document.getElementById('itemInput');
+            const addBtn = document.getElementById('addBtn');
+            const completeBtn = document.getElementById('completeBtn');
+            
+            // 추가 버튼: 입력 내용이 있을 때만 활성화
+            addBtn.disabled = input.value.trim() === '';
+            
+            // 완료 버튼: 항목이 하나 이상 있을 때만 활성화
+            completeBtn.disabled = items.length === 0;
+        }
+
+        function addItem() {
+            const input = document.getElementById('itemInput');
+            const item = input.value.trim();
+            
+            if (item === '') return;
+            
+            if (items.includes(item)) {
+                alert('이미 추가된 항목입니다!');
+                input.value = '';
+                updateButtonStates();
+                return;
+            }
+            
+            items.push(item);
+            input.value = '';
+            updateCurrentItems();
+            updateButtonStates();
+            
+            // 포커스를 다시 입력 필드로
+            input.focus();
+        }
+
+        function completeInput() {
+            if (items.length > 0) {
+                showConfirmStep();
+            }
+        }
+
+        function updateCurrentItems() {
+            const element = document.getElementById('currentItems');
+            if (items.length === 0) {
+                element.innerHTML = '입력된 항목이 여기에 표시됩니다.';
+            } else {
+                element.innerHTML = `
+                    <div class="item-display">
+                        <strong>입력된 항목 (${items.length}개):</strong>
+                    </div>
+                    <div class="item-tags">
+                        ${items.map((item, index) => 
+                            `<div class="item-tag">
+                                ${index + 1}. ${item}
+                                <button class="remove-item" onclick="removeItem(${index})">×</button>
+                            </div>`
+                        ).join('')}
+                    </div>
+                `;
+            }
+        }
+
+        function removeItem(index) {
+            items.splice(index, 1);
+            updateCurrentItems();
+            updateButtonStates();
+        }
+
+        function showConfirmStep() {
+            currentStep = 2;
+            showStep(2);
+            
+            document.getElementById('confirmItems').innerHTML = `
+                <div class="item-display">
+                    <strong>입력한 항목 (${items.length}개):</strong>
+                </div>
+                <div class="item-tags">
+                    ${items.map((item, index) => `<div class="item-tag">${index + 1}. ${item}</div>`).join('')}
+                </div>
+            `;
+            
+            document.getElementById('confirmText').innerHTML = 
+                `현재 ${items.length}개입니다. 이대로 진행하시려면 Y, 다시 시작하려면 N을 눌러주세요.`;
+        }
+
+        function proceedToDraw() {
+            currentStep = 3;
+            showStep(3);
+            
+            document.getElementById('drawCountInfo').innerHTML = 
+                `총 ${items.length}개 중에서 몇 개를 뽑으시겠습니까?<br>(중복 제외, 입력 순서대로 표시됩니다)`;
+            
+            document.getElementById('drawCountInput').focus();
+        }
+
+        function startOver() {
+            items = [];
+            currentStep = 1;
+            showStep(1);
+            updateCurrentItems();
+            updateButtonStates();
+            document.getElementById('itemInput').focus();
+        }
+
+        function startCountdown() {
+            const input = document.getElementById('drawCountInput');
+            const count = parseInt(input.value);
+            const errorElement = document.getElementById('errorMessage');
+            
+            errorElement.innerHTML = '';
+            
+            if (!count || count < 1) {
+                errorElement.innerHTML = '1 이상의 숫자를 입력해주세요!';
+                return;
+            }
+            
+            if (count > items.length) {
+                errorElement.innerHTML = `입력한 항목은 ${items.length}개입니다. ${items.length}개 이하로 입력해주세요!`;
+                return;
+            }
+            
+            drawCount = count;
+            currentStep = 4;
+            showStep(4);
+            
+            // 3초 카운트다운
+            countdown(3);
+        }
+
+        function countdown(count) {
+            const countdownElement = document.getElementById('countdown');
+            
+            if (count > 0) {
+                countdownElement.textContent = count;
+                countdownElement.style.transform = 'scale(1.2)';
+                
+                setTimeout(() => {
+                    countdownElement.style.transform = 'scale(1)';
+                }, 200);
+                
+                setTimeout(() => countdown(count - 1), 1000);
+            } else {
+                countdownElement.textContent = '';
+                showResults();
+            }
+        }
+
+        function showResults() {
+            // 중복 없는 랜덤 추출 (기존 순서 유지)
+            const shuffledItems = [...items];
+            const selectedItems = [];
+            
+            for (let i = 0; i < drawCount; i++) {
+                const randomIndex = Math.floor(Math.random() * shuffledItems.length);
+                selectedItems.push(shuffledItems.splice(randomIndex, 1)[0]);
+            }
+            
+            // 원래 입력 순서대로 정렬
+            selectedItems.sort((a, b) => items.indexOf(a) - items.indexOf(b));
+            
+            const resultsElement = document.getElementById('results');
+            resultsElement.innerHTML = `
+                <div class="results">
+                    <h3>🎯 뽑기 결과</h3>
+                    ${selectedItems.map((item, index) => 
+                        `<div class="result-item">${index + 1}. ${item}</div>`
+                    ).join('')}
+                </div>
+            `;
+        }
+
+        function showStep(step) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
+        }
+
+        function restart() {
+            items = [];
+            drawCount = 0;
+            currentStep = 1;
+            
+            // 모든 입력 필드 초기화
+            document.getElementById('itemInput').value = '';
+            document.getElementById('drawCountInput').value = '';
+            document.getElementById('errorMessage').innerHTML = '';
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('countdown').innerHTML = '';
+            
+            showStep(1);
+            updateCurrentItems();
+            updateButtonStates();
+            document.getElementById('itemInput').focus();
+        }
+
+        // 초기화
+        updateCurrentItems();
+        updateButtonStates();
+        document.getElementById('itemInput').focus();
+    </script>
+</body>
+</html>
